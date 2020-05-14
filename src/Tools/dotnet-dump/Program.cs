@@ -75,9 +75,10 @@ images. mini - A small dump containing module lists, thread lists, exception inf
                 description: "Starts an interactive shell with debugging commands to explore a dump")
             {
                 // Handler
-                CommandHandler.Create<FileInfo, string[]>(new Analyzer().Analyze),
+                CommandHandler.Create<FileInfo, string[], string[]>(new Analyzer().Analyze),
                 // Arguments and Options
                 DumpPath(),
+                Extensions(),
                 RunCommand() 
             };
 
@@ -87,6 +88,13 @@ images. mini - A small dump containing module lists, thread lists, exception inf
             {
                 Description = "Name of the dump file to analyze."
             }.ExistingOnly();
+
+        private static Option Extensions() =>
+            new Option(
+                aliases: new[] { "-e", "--extensions" })
+            {
+                Argument = new Argument<string[]>("extensions", System.Array.Empty<string>()) { Arity = ArgumentArity.ZeroOrMore }
+            };
 
         private static Option RunCommand() =>
             new Option(

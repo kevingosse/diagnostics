@@ -25,7 +25,7 @@ namespace Microsoft.Diagnostics.Tools.Dump
     {
         private readonly ServiceProvider _serviceProvider;
         private readonly ConsoleProvider _consoleProvider;
-        private readonly CommandProcessor _commandProcessor;
+        private CommandProcessor _commandProcessor;
         private bool _isDesktop;
         private string _dacFilePath;
 
@@ -42,11 +42,20 @@ namespace Microsoft.Diagnostics.Tools.Dump
         {
             _serviceProvider = new ServiceProvider();
             _consoleProvider = new ConsoleProvider();
-            _commandProcessor = new CommandProcessor(_serviceProvider, _consoleProvider, new Assembly[] { typeof(Analyzer).Assembly });
         }
 
-        public async Task<int> Analyze(FileInfo dump_path, string[] command)
+        public async Task<int> Analyze(FileInfo dump_path, string[] extensions, string[] command)
         {
+            var assemblies = new List<Assembly> { typeof(Analyzer).Assembly };
+
+            foreach (var path in extensions)
+            {
+                var assembly = Assembly.LoadFrom(path);
+                assemblies.Add(assembly);
+            }
+
+            _commandProcessor = new CommandProcessor(_serviceProvider, _consoleProvider, assemblies);
+
             _consoleProvider.WriteLine($"Loading core dump: {dump_path} ...");
 
             try
